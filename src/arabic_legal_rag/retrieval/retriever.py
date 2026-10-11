@@ -58,4 +58,5 @@ class Retriever:
         ):
             if m["article_number"] not in seen:
                 hits.append(_hit(i, d, m, 1 - dist, "dense"))
+        hits.sort(key=lambda h: h["score"], reverse=True)
         return hits[:k]

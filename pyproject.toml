@@ -37,6 +37,7 @@ track = [
 serve = ["bentoml", "locust"]            # vllm / autoawq: install separately on a GPU machine
 monitor = ["langfuse"]
 drift   = ["evidently", "scikit-learn", "scipy"]
+ui = ["streamlit"]
 
 [dependency-groups]
 dev = [
