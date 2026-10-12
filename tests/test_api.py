@@ -19,7 +19,7 @@ def fake_backend(monkeypatch):
     # the embeddings key is not available in CI; the endpoint only checks that it is set
     monkeypatch.setattr(main, "embeddings_configured", lambda: True)
     # bypass Langfuse: call the pipeline directly
-    monkeypatch.setattr(main, "traced_query", lambda q, fn: (fn(q), None))
+    monkeypatch.setattr(main, "traced_query", lambda q, fn, **kwargs: (fn(q), None))
     monkeypatch.setattr(rag, "documents_indexed", lambda: 1094)
     monkeypatch.setattr(rag, "query", lambda q: {"answer": f"{q} [147]", "sources": [CITATION]})
 
