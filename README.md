@@ -606,7 +606,7 @@ must not replace a qualified lawyer or the official text of the law.
 <div align="center">
 
 **<Sara Ibrahim>**
-<Your title, e.g. AI / ML Engineer · Data Scientist>
+<AI / ML Engineer · Data Scientist>
 
 [![GitHub](https://img.shields.io/badge/GitHub-sara692-181717?logo=github&logoColor=white)](https://github.com/sara692)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-<your--handle>-0A66C2?logo=linkedin&logoColor=white)](https://www.linkedin.com/in/sara-ibrahim-omran>)
