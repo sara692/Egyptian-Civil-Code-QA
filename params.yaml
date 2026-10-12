@@ -6,10 +6,10 @@ passage_prefix: ""
 judge_embedding_model: baai/bge-m3
 collection: civil_code
 chunk_text: ar_en # ar_only | ar_en | header_ar_en
-top_k: 5
+top_k: 7
 batch_size: 16
 llm_temperature: 0.0
 llm_max_tokens: 700
-max_context_articles: 5
+max_context_articles: 7
 min_score: 0.0 # calibrate in step 8
 mlflow_experiment: arabic-legal-rag-chunking2

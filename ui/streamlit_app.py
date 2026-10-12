@@ -11,6 +11,7 @@ Run:  uv run --no-sync streamlit run ui/streamlit_app.py
 
 import os
 import time
+import uuid
 
 import httpx
 import streamlit as st
@@ -41,8 +42,19 @@ st.markdown(
 )
 
 
+def tracking_headers() -> dict[str, str]:
+    """Ids the API forwards to Langfuse: one session per browser tab, plus an optional user name."""
+    headers = {"X-Session-Id": st.session_state["session_id"]}
+    user = st.session_state.get("user_name", "").strip()
+    if user:
+        headers["X-User-Id"] = user
+    return headers
+
+
 def ask_fastapi(base_url: str, question: str) -> dict:
-    r = httpx.post(f"{base_url}/ask", json={"question": question}, timeout=TIMEOUT)
+    r = httpx.post(
+        f"{base_url}/ask", json={"question": question}, headers=tracking_headers(), timeout=TIMEOUT
+    )
     if r.status_code == 503:
         raise RuntimeError("The LLM or embedding backend is not configured or not reachable (503).")
     if r.status_code == 422:
@@ -54,7 +66,11 @@ def ask_fastapi(base_url: str, question: str) -> dict:
 def stream_bento(base_url: str, question: str):
     """Yield text chunks as the server produces them."""
     with httpx.stream(
-        "POST", f"{base_url}/ask_stream", json={"question": question}, timeout=TIMEOUT
+        "POST",
+        f"{base_url}/ask_stream",
+        json={"question": question},
+        headers=tracking_headers(),
+        timeout=TIMEOUT,
     ) as r:
         if r.status_code >= 400:
             r.read()
@@ -72,8 +88,11 @@ def check_health(base_url: str) -> str:
 
 
 # ---------- sidebar ----------
+st.session_state.setdefault("session_id", uuid.uuid4().hex)
+
 with st.sidebar:
     st.header("Settings")
+    st.text_input("Your name (optional, shown in Langfuse)", key="user_name")
     backend = st.radio("Backend", ["FastAPI (/ask)", "BentoML (streaming)"])
     streaming = backend.startswith("BentoML")
     base_url = st.text_input("API address", BENTO_URL if streaming else FASTAPI_URL).rstrip("/")
@@ -89,6 +108,9 @@ with st.sidebar:
     st.divider()
     if st.button("Clear conversation", use_container_width=True):
         st.session_state["messages"] = []
+        st.session_state["session_id"] = (
+            uuid.uuid4().hex
+        )  # a new conversation = a new Langfuse session
         st.rerun()
 
 # ---------- conversation ----------

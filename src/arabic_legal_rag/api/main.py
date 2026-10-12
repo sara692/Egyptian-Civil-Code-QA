@@ -5,7 +5,7 @@ import time
 from contextlib import asynccontextmanager
 
 import openai
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Header, HTTPException
 from prometheus_client import make_asgi_app
 
 from .. import rag
@@ -72,13 +72,19 @@ def health() -> dict:
 
 
 @app.post("/ask", response_model=AskResponse)
-def ask(req: AskRequest) -> dict:
+def ask(
+    req: AskRequest,
+    x_session_id: str | None = Header(default=None),
+    x_user_id: str | None = Header(default=None),
+) -> dict:
     start = time.perf_counter()
     if not (llm_configured() and embeddings_configured()):
         metrics.record_request("unavailable", time.perf_counter() - start)
         raise HTTPException(status_code=503, detail="LLM or embedding backend is not configured")
     try:
-        result, _trace_id = traced_query(req.question, rag.query)
+        result, _trace_id = traced_query(
+            req.question, rag.query, session_id=x_session_id, user_id=x_user_id
+        )
     except openai.OpenAIError as exc:
         metrics.record_request("unavailable", time.perf_counter() - start)
         log.exception("LLM or embedding call failed")
